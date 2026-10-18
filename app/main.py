@@ -33,11 +33,12 @@ async def root() -> RedirectResponse:
     return RedirectResponse(SPA_DIR + "/index.html", status_code=307)
 
 
-if _STATIC_DIR.exists():
-    # Mounted AFTER the API routes and the root redirect, so both win.
-    app.mount("/", StaticFiles(directory=_STATIC_DIR, html=True), name="static")
-
-
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "db": get_db_path(), "static": str(_STATIC_DIR)}
+
+
+if _STATIC_DIR.exists():
+    # Mounted AFTER the API routes, the root redirect and /health, so all
+    # of them win over the static file lookup.
+    app.mount("/", StaticFiles(directory=_STATIC_DIR, html=True), name="static")

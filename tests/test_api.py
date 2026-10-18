@@ -175,3 +175,15 @@ def test_response_contract_keys(client):
                    {"mode": "bogus"}):
         keys = set(_post(client, fields).json().keys())
         assert keys == {"res", "str"}
+
+
+def test_health(client):
+    r = client.get("/health")
+    assert r.status_code == 200
+    assert r.json()["status"] == "ok"
+
+
+def test_root_redirect(client):
+    r = client.get("/", follow_redirects=False)
+    assert r.status_code == 307
+    assert r.headers["location"] == "/eqdb/data/shindo/index.html"

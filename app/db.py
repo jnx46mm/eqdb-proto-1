@@ -10,8 +10,9 @@ Tables:
   intensities  -- per-station intensity rows for each quake.
 
 Helpers:
-  parse_int_level / parse_char_level -- numeric intensity (1..7) used for
-  the obsInt/maxInt range filter.
+  parse_int_level / parse_char_level -- numeric intensity (1..7) parsed
+  from the digit classes of the row text (5弱..6強 / 震度7 have NULL
+  int_level; the maxInt filter instead ranks maxIcls, see app/api.py).
 """
 
 from __future__ import annotations

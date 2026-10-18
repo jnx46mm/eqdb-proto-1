@@ -142,16 +142,19 @@ def main() -> int:
     total_ids: set[str] = set()
     while cur < stop:
         win_to = min(cur + step, stop)
-        # Two passes per window (live semantics: maxInt=7 = 震度7 exact):
-        #  (obsInt=1, maxInt=6) -> all quakes of 震度1..6
-        #  (obsInt=1, maxInt=7) -> 震度7 quakes only
+        # One pass per window is enough.  (Live semantics verified by
+        # probes, see research.md §8: maxInt accepts the letter codes
+        # {2,3,4,A,B,C,D} as ">= 震度N弱/強" plus 7 = 震度7 exact; any other
+        # value such as 6 is silently ignored, so (obsInt=1, maxInt=6)
+        # returns ALL quakes.  The previously assumed two-pass split
+        # 震度1..6 / 震度7 was unnecessary -- and maxInt=7 alone would
+        # actually FILTER OUT every 震度1..6 quake.)
         quakes = []
         try:
-            for obs, mx in (("1", "6"), ("1", "7")):
-                j = search_window(cur, win_to, obs, mx, args.sleep)
-                res = j.get("res")
-                if isinstance(res, list):
-                    quakes += res
+            j = search_window(cur, win_to, "1", "6", args.sleep)
+            res = j.get("res")
+            if isinstance(res, list):
+                quakes = res
         except Exception as e:  # noqa: BLE001
             print(f"ABORT: window {cur:%Y-%m-%d} failed after retries: {e}")
             return 1
